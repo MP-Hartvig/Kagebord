@@ -61,11 +61,29 @@ namespace MongoDb.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &quot;Cakes&quot;.
+        /// </summary>
+        internal static string CollectionName {
+            get {
+                return ResourceManager.GetString("CollectionName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &quot;mongodb://localhost:27017&quot;.
         /// </summary>
         internal static string ConnectionString {
             get {
                 return ResourceManager.GetString("ConnectionString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &quot;CakeDb&quot;.
+        /// </summary>
+        internal static string DatabaseName {
+            get {
+                return ResourceManager.GetString("DatabaseName", resourceCulture);
             }
         }
     }

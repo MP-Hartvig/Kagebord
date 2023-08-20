@@ -117,7 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CollectionName" xml:space="preserve">
+    <value>"Cakes"</value>
+  </data>
   <data name="ConnectionString" xml:space="preserve">
     <value>"mongodb://localhost:27017"</value>
+  </data>
+  <data name="DatabaseName" xml:space="preserve">
+    <value>"CakeDb"</value>
   </data>
 </root>

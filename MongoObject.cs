@@ -1,47 +1,72 @@
-﻿using MongoDB.Driver;
-using MongoDB.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver;
+using MongoDB.Driver.GridFS;
 
 namespace MongoDb
 {
-    internal class MongoObject : Entity
+    internal class MongoObject
     {
+        [BsonId, BsonElement("objectId"), BsonRepresentation(BsonType.ObjectId)]
+        public string _objectId { get; set; }
+
+        [BsonElement("name")]
         public string Name { get; set; }
 
+        [BsonElement("ingredients")]
         public string[] Ingredients { get; set; }
 
+        [BsonElement("timeToMake")]
         public float TimeToMake { get; set; }
 
+        [BsonElement("description")]
         public string Description { get; set; }
     }
 
-    internal class MongoDataHandler 
+    internal class MongoDataHandler
     {
-        //public bool Upload(IMongoCollection<MongoObject> collection, MongoObject cake)
-        //{
-        //    return TryInsertion(collection, cake);
-        //}
+        GridFSBucket fs;
+        IMongoDatabase imdb;
+        MongoClient mongoClient;
+        string collectionName = "Cakes";
+        string databaseName = "CakeDb";
+        //string collectionName = Environment.GetEnvironmentVariable("CollectionName")!;
+        //string databaseName = Environment.GetEnvironmentVariable("CakeDb")!;
 
-        private bool TryInsertion(IMongoCollection<MongoObject> collection, List<MongoObject> cakes)
+        public MongoDataHandler(string conString)
         {
-            try
-            {
-                collection.InsertMany(cakes);
-                return true;
-
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
+            mongoClient = new MongoClient(conString);
+            imdb = mongoClient.GetDatabase(databaseName);
+            fs = new GridFSBucket(imdb);
         }
 
-        public async void CreateData(IMongoCollection<MongoObject> collection)
+        public List<MongoObject> GetCakesWithinThreshold(int timeToMake)
+        {
+            return fs.Database.GetCollection<MongoObject>(collectionName).Find(x => x.TimeToMake <= timeToMake).ToList();
+        }
+
+        public MongoObject GetCakeByName(string name)
+        {
+            return fs.Database.GetCollection<MongoObject>(collectionName).Find(x => x.Name == name).FirstOrDefault();
+        }
+
+        public MongoObject DeleteCakeByName(string name)
+        {
+            return fs.Database.GetCollection<MongoObject>(collectionName).FindOneAndDelete(x => x.Name == name);
+        }
+
+        public void InsertInitialData()
+        {
+            IEnumerable<MongoObject> dataToSave = CreateData();
+            UploadList(fs, dataToSave, collectionName);
+        }
+
+        private void UploadList(GridFSBucket fs, IEnumerable<MongoObject> list, string collectionName)
+        {
+            fs.Database.GetCollection<MongoObject>(collectionName).InsertMany(list);
+        }
+
+        private IEnumerable<MongoObject> CreateData()
         {
             List<MongoObject> cakes = new List<MongoObject>();
 
@@ -125,7 +150,9 @@ namespace MongoDb
                 Description = "En tæt kage lavet med mandelessens og ofte overtrukket med\r\nchokolade."
             });
 
-            await cakes.SaveAsync();
+            Console.WriteLine(cakes.Count);
+
+            return cakes;
         }
     }
 }
